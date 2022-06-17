@@ -1,0 +1,160 @@
+I need to decrease the stock remaining once an order is marked paid *
+I need to check if the increase stock preference is enabled then increase a product stock when an order is been refunded and returned back
+I need to do an option where an order is been refunded when it meets certain criteria
+I need to do the coupons part for vendors *
+I need to add account details for vendors on sign up or not. Will be used if the transfer option is picked *
+I need to do withdrawal for vendors in the folder /transactions *
+I need to do service charge payment for vendors in the folder /transactions *
+
+require '../../config/connect_to_me.php';
+include_once "../../config/functions.php";
+
+class genericClass {
+  public $engineMessage = 0;
+  public $engineError = 0;
+  public $engineErrorMessage;
+  public $resultData;
+  public $filteredData;
+}
+
+$returnvalue = new genericClass();
+$returnvalue->engineMessage = 1;
+$returnvalue->resultData = $cart_array;
+
+$returnvalue = new genericClass();
+$returnvalue->engineError = 2;
+$returnvalue->engineErrorMessage = "No data found";
+
+vendors.business_name as vendor_name, vendors.stripped as vendor_stripped,
+
+INNER JOIN vendors ON carts.vendor_unique_id = vendors.unique_id
+
+$current_cart['vendor_name'] = $value['vendor_name'];
+$current_cart['vendor_stripped'] = $value['vendor_stripped'];
+
+orders_completed.vendor_unique_id=:vendor_unique_id
+
+$vendor_unique_id = isset($_GET['vendor_unique_id']) ? $_GET['vendor_unique_id'] : $data["vendor_unique_id"];
+
+$query->bindParam(":vendor_unique_id", $vendor_unique_id);
+
+$active = $functions->active;
+carts.status=:status
+$query->bindParam(":status", $active);
+
+$start_limit = isset($_GET['start_limit']) ? $_GET['start_limit'] : $data["start_limit"];
+$end_limit = isset($_GET['end_limit']) ? $_GET['end_limit'] : $data["end_limit"];
+
+$not_allowed_values = $functions->not_allowed_values;
+
+$start_limit = in_array($start_limit,$not_allowed_values) ? 0 : $start_limit;
+
+if ($functions->validateInt($start_limit) == false && $start_limit != "0") {
+  $returnvalue = new genericClass();
+  $returnvalue->engineError = 2;
+  $returnvalue->engineErrorMessage = "Specify start limit";
+}
+else if ($functions->validateInt($end_limit) == false) {
+  $returnvalue = new genericClass();
+  $returnvalue->engineError = 2;
+  $returnvalue->engineErrorMessage = "Specify end limit";
+}
+else {
+
+}
+
+ORDER BY products.added_date ASC, products.views DESC, products.favorites DESC, products.good_rating DESC LIMIT ".$start_limit.",".$end_limit."";
+
+--------------------------------------------------------------------------------
+
+$data = json_decode(file_get_contents("php://input"), true);
+
+$functions = new Functions();
+
+if ($connected) {
+
+  try {
+    $conn->beginTransaction();
+
+
+
+    $conn->commit();
+  } catch (PDOException $e) {
+    $conn->rollback();
+    throw $e;
+  }
+
+}
+else {
+  $returnvalue = new genericClass();
+  $returnvalue->engineError = 3;
+  $returnvalue->engineErrorMessage = "No connection";
+}
+
+*********************************************************************************************************************************************************************
+
+$preference = "increase_stock";
+
+$sql11 = "SELECT balance, service_charge FROM preferences WHERE vendor_unique_id=:vendor_unique_id AND $preference=:$preference";
+$query11 = $conn->prepare($sql11);
+$query11->bindParam(":vendor_unique_id", $vendor_unique_id);
+$query11->bindParam($preference, $active);
+$query11->execute();
+
+$the_preference_details = $query11->rowCount() > 0 ? $query11->fetch() : null;
+
+if ($the_preference_details) {
+  // code...
+}
+else {
+  $returnvalue = new genericClass();
+  $returnvalue->engineError = 2;
+  $returnvalue->engineErrorMessage = "Vendor's stock preference not found";
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+$payment_method = "Card";
+
+$final_price = 15000;
+
+$service_charge_amount = 650;
+
+$vendor_balance = 48620;
+
+$vendor_service_charge = 780;
+
+if($payment_method == "Card" || $payment_method == "Wallet"){
+
+	$total_service_charge = $vendor_service_charge + $service_charge_amount;
+
+	$calculate_service_charge_if_not_greater = $final_price > $total_service_charge ? $final_price - $total_service_charge : 0;
+
+	$calculate_service_charge_if_greater = $total_service_charge > $final_price ? $total_service_charge - $final_price : $total_service_charge;
+
+	$new_card_balance = $vendor_balance + $calculate_service_charge_if_not_greater;
+
+	$new_service_charge_for_card = $new_card_balance > $calculate_service_charge_if_greater ? 0 : $total_service_charge - $final_price;
+
+	echo "\t\t\n\n"."| New Balance : ".$new_card_balance;
+	echo "\t\t\n\n"."| New Service Charge for Card and Wallet : ".$new_service_charge_for_card;
+}
+else {
+
+	$total_service_charge = $vendor_service_charge + $service_charge_amount;
+
+	$calculate_service_charge_if_not_greater = $final_price > $total_service_charge ? $final_price - $service_charge_amount : 0;
+
+	$supposed_cash_balance = $vendor_balance + $calculate_service_charge_if_not_greater;
+
+	$preferred_cash_balance = $vendor_balance + ($final_price - $service_charge_amount);
+
+	$new_cash_balance = $total_service_charge > $final_price ? $preferred_cash_balance : $supposed_cash_balance;
+
+	$new_service_charge_for_cash = $total_service_charge;
+
+	echo "\t\t\n\n"."| New Balance : ".$new_cash_balance;
+	echo "\t\t\n\n"."| New Service Charge for Cash, POS and Transfer : ".$new_service_charge_for_cash;
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
